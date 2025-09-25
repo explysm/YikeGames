@@ -6,7 +6,7 @@ name: Build and Release Electron App
 on:
   push:
     branches:
-      - main
+      - main # CHANGED FROM 'app' TO 'main'
 
 # A workflow is composed of one or more jobs that can run sequentially or in parallel.
 jobs:
@@ -29,17 +29,20 @@ jobs:
 
       # Step 3: Installs all project dependencies.
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm cache clean --force
+          npm install --force
 
       # Step 4: Runs the Electron build command.
+      # MODIFIED: We are now only building for Linux and Windows.
       - name: Build and package the Electron app
-        run: npm run build
+        run: npm run build -- --linux --win
 
       # Step 5: Creates a new GitHub Release and uploads the build files.
       # This step will create a new release with a unique name based on the commit.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/heads/main')
+        if: startsWith(github.ref, 'refs/heads/main') # CHANGED TO 'main'
         with:
           # The name of the release. This will be visible on your repository's Releases page.
           name: App Build (${{ github.sha }})
@@ -55,3 +58,4 @@ jobs:
           # This provides the necessary token for the action to create the release.
           # This token is automatically provided by GitHub; you don't need to create it.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

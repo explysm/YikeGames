@@ -1,4 +1,4 @@
-/* --- Retro Futurism Vibe --- */
+/* --- Retro Futurism Vibe (Original CSS) --- */
 
 /* Basic Reset & Font */
 * {
@@ -106,6 +106,22 @@ header .subtitle {
     opacity: 0.7;
 }
 
+/*
+ * NEW FIX: Ensures any bare <a> tags in the header/navigation 
+ * get basic neon styling and lose the default underline.
+ */
+header a, .navigation a {
+    color: #01edf0;
+    text-decoration: none;
+    text-shadow: 0 0 5px #01edf0;
+    transition: color 0.2s ease;
+}
+
+header a:hover, .navigation a:hover {
+    color: #fff;
+    text-shadow: 0 0 15px #01edf0;
+}
+
 /* --- Main Layout --- */
 .main-content {
     display: flex;
@@ -144,6 +160,7 @@ header .subtitle {
     margin-bottom: 50px;
 }
 
+/* The primary button style, used for links or buttons */
 .btn {
     background-color: transparent;
     border: 2px solid #01edf0;
@@ -155,12 +172,20 @@ header .subtitle {
     transition: all 0.3s ease;
     box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
     border-radius: 0;
+    text-decoration: none; /* Crucial for links that use this class */
+    display: inline-block; /* Crucial for links to inherit block properties */
 }
 
 .btn:hover {
     background-color: rgba(1, 237, 240, 0.2);
     box-shadow: 0 0 20px #01edf0;
     transform: scale(1.05);
+}
+
+/* NEW: Specialized button style for Navigation links that need the full button look */
+.nav-btn {
+    /* Inherits all .btn styles */
+    /* If you need any slight variation from .btn, add it here */
 }
 
 /* Specific buttons, keeping the neon theme */
@@ -171,6 +196,8 @@ header .subtitle {
     font-size: 1.3rem;
     padding: 10px 25px;
     transition: all 0.3s ease;
+    text-decoration: none; /* Make sure these links lose underline too */
+    display: inline-block;
 }
 
 .login-btn:hover, #send-btn:hover {
@@ -407,18 +434,7 @@ body.chat-page, body.forums-page {
 }
 
 /* Specific button styling on the main page, ensuring consistency */
-.btn {
-    background-color: transparent;
-    border: 2px solid #01edf0;
-    color: #01edf0;
-    padding: 12px 30px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    text-shadow: 0 0 5px #01edf0;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
-    border-radius: 0;
-}
+/* NOTE: The .btn class is already defined above and includes text-decoration: none and display: inline-block */
 
 /* --- Mobile-first Layout adjustments --- */
 @media (max-width: 768px) {
@@ -723,3 +739,358 @@ body.chat-page, body.forums-page {
     box-shadow: 0 0 20px #01edf0;
     transform: scale(1.05);
 }
+
+/* ========================================================= */
+/* --- NEW GALLERY PAGE STYLES (Game Card, Modal, Buttons) --- */
+/* ========================================================= */
+
+/* Game Grid Container */
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    width: 100%;
+    margin-top: 20px;
+    padding: 0 20px;
+}
+
+/* Loading/Spinner message */
+.loading-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    font-size: 1.5rem;
+}
+
+/* Spinner (Basic CSS only) */
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(1, 237, 240, 0.3);
+    border-radius: 50%;
+    border-top-color: #01edf0;
+    animation: spin 1s ease-in-out infinite;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Game Card Styling */
+.game-card {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 25px #01edf0;
+}
+
+.game-card-image-container {
+    position: relative;
+    width: 100%;
+    /* 16:9 aspect ratio for covers */
+    padding-bottom: 56.25%; 
+    overflow: hidden;
+}
+
+.game-card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.3s ease;
+}
+
+.game-card-content {
+    padding: 15px;
+    text-align: left;
+}
+
+.game-card-title {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    color: #fff;
+    text-shadow: 0 0 5px #01edf0;
+}
+
+.game-card-description {
+    font-size: 1rem;
+    color: #01edf0;
+    margin-bottom: 10px;
+    opacity: 0.8;
+    /* Truncate description */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.game-card-author {
+    font-size: 0.9rem;
+    color: #fff;
+    opacity: 0.6;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.game-card-link {
+    display: block;
+    text-align: center;
+    background-color: #01edf0;
+    color: #0b1a2a;
+    text-decoration: none;
+    padding: 10px 15px;
+    font-weight: bold;
+    border-radius: 0;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.game-card-link:hover {
+    background-color: #47f7f9;
+    box-shadow: 0 0 20px #01edf0;
+}
+
+/* --- Developer Overlay (Edit/Delete Buttons) --- */
+.developer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.game-card:hover .developer-overlay {
+    opacity: 1;
+}
+
+/* Edit and Delete Buttons (Highly Specific Styling) */
+.developer-overlay .delete-btn,
+.developer-overlay .edit-btn {
+    background-color: rgba(255, 0, 127, 0.1); /* Pink/Red hue for danger/action */
+    border: 2px solid #ff007f;
+    color: #ff007f;
+    padding: 8px 15px;
+    margin: 0 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #ff007f;
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+.developer-overlay .edit-btn {
+    background-color: rgba(1, 237, 240, 0.1);
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    text-shadow: 0 0 5px #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+}
+
+.developer-overlay .delete-btn:hover {
+    background-color: rgba(255, 0, 127, 0.5);
+    box-shadow: 0 0 20px #ff007f;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.developer-overlay .edit-btn:hover {
+    background-color: rgba(1, 237, 240, 0.5);
+    box-shadow: 0 0 20px #01edf0;
+    color: #0b1a2a;
+    transform: scale(1.1);
+}
+
+
+/* --- Modal Styling --- */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.modal-content {
+    background: #0d283c;
+    border: 3px solid #01edf0;
+    box-shadow: 0 0 20px #01edf0;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    border-radius: 0;
+    animation: modal-fade-in 0.5s ease;
+}
+
+@keyframes modal-fade-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 2rem;
+    text-shadow: 0 0 10px #01edf0;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: #ff007f;
+    font-size: 2rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #ff007f;
+    transition: transform 0.2s ease;
+}
+
+.close-modal-btn:hover {
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+/* Modal Form Styles */
+.form-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-field-group input[type="file"] {
+    border: 2px solid #01edf0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #01edf0;
+    font-size: 1rem;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    cursor: pointer;
+}
+
+/* Submit Button in Modal */
+.submit-button {
+    background-color: transparent;
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    padding: 12px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #01edf0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5);
+    border-radius: 0;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.submit-button:hover:not(:disabled) {
+    background-color: rgba(1, 237, 240, 0.2);
+    box-shadow: 0 0 20px #01edf0;
+}
+
+.submit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: none;
+}
+
+/* Upload Status Message */
+.upload-status {
+    font-size: 0.9rem;
+    color: #ff007f;
+    text-shadow: 0 0 5px #ff007f;
+    text-align: center;
+    margin-top: 5px;
+}
+
+/* Notification Styling */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    padding: 15px 25px;
+    border: 2px solid;
+    box-shadow: 0 0 15px;
+    font-size: 1rem;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+    border-radius: 0;
+    min-width: 250px;
+}
+
+.notification.success {
+    background-color: rgba(1, 237, 240, 0.2);
+    border-color: #01edf0;
+    color: #01edf0;
+    box-shadow: 0 0 15px #01edf0;
+}
+
+.notification.error {
+    background-color: rgba(255, 0, 127, 0.2);
+    border-color: #ff007f;
+    color: #ff007f;
+    box-shadow: 0 0 15px #ff007f;
+}
+
+/* Utility Class */
+.hidden {
+    display: none !important;
+}
+
+/* Mobile adjustments for the gallery grid */
+@media (max-width: 768px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+        padding: 0 10px;
+    }
+    .modal-content {
+        padding: 20px;
+    }
+}
+

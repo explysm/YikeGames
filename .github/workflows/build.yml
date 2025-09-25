@@ -9,8 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # CRITICAL: This is the mandatory fix for the GITHUB_TOKEN to work.
-    # It grants the workflow 'write' permissions to create a release.
+    # CRITICAL: Grants the GITHUB_TOKEN write access to create the release and tag
     permissions:
       contents: write 
 
@@ -18,6 +17,9 @@ jobs:
       # Step 1: Checks out your repository's code.
       - name: Checkout repository
         uses: actions/checkout@v4
+        # Fetch all history to find the previous tag for changelog generation.
+        with:
+          fetch-depth: 0
 
       # Step 2: Sets up a Node.js environment.
       - name: Setup Node.js
@@ -31,31 +33,77 @@ jobs:
           npm cache clean --force
           npm install --force
 
-      # Step 4: Installs Wine and 32-bit support, necessary for building Windows executables on Linux.
+      # Step 4: Installs Wine and 32-bit support (i386) for Windows cross-compilation.
       - name: Install Wine and 32-bit Support
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y wine wine32:i386
 
-      # Step 5: Runs the Electron build command. This is where the token error occurred before.
-      # The `env` block passes the GITHUB_TOKEN to the build process, satisfying any
-      # signing or publishing requirements of electron-builder.
+      # Step 5: Generate unique two-word name (e.g., "biscuit-dragon")
+      - name: Generate Unique Release Name
+        id: unique_name
+        run: |
+          # Get the total number of words in the dictionary file
+          WORD_COUNT=$(wc -l < /usr/share/dict/words)
+          
+          # Generate two unique random line numbers
+          R1=$((1 + $RANDOM % $WORD_COUNT))
+          R2=$((1 + $RANDOM % $WORD_COUNT))
+          
+          # Get the words, convert to lowercase, and format
+          WORD1=$(sed -n "${R1}p" /usr/share/dict/words | tr -d "[:punct:]" | tr '[:upper:]' '[:lower:]')
+          WORD2=$(sed -n "${R2}p" /usr/share/dict/words | tr -d "[:punct:]" | tr '[:upper:]' '[:lower:]')
+          
+          UNIQUE_TAG="${WORD1}-${WORD2}"
+          RELEASE_TITLE="${WORD1} ${WORD2} Build"
+          
+          echo "Generated Tag: $UNIQUE_TAG"
+          
+          # Set variables as outputs for the next step to consume
+          echo "release_tag=$UNIQUE_TAG" >> $GITHUB_OUTPUT
+          echo "release_title=$RELEASE_TITLE" >> $GITHUB_OUTPUT
+      
+      # Step 6: Generates the release notes from git commit history.
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          # Fetch all tags to get a full history
+          git fetch --tags
+          
+          # Find the previous tag, or use a default if it's the first run
+          if git describe --tags --abbrev=0 >/dev/null 2>&1; then
+            PREVIOUS_TAG=$(git describe --tags --abbrev=0)
+          else
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          
+          # Get the commit messages, formatted as a bulleted list
+          NOTES=$(git log --pretty=format:"- %s" ${PREVIOUS_TAG}..HEAD)
+          
+          # Pass the notes to the next step
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      # Step 7: Runs the Electron build command.
       - name: Build and package the Electron app
         run: npm run build -- --linux --win
         env:
+          # Passes the tokens required by electron-builder for signing/notarization
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 6: Creates a new GitHub Release and uploads the build files.
-      # The `softprops/action-gh-release` action uses the token from the `with` block.
+      # Step 8: Creates a new GitHub Release and uploads the build files.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/heads/main')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: App Build (${{ github.sha }})
-          tag_name: build-${{ github.sha }}
-          body: This is an automated build from the 'main' branch.
+          # Use the new unique words generated in Step 5
+          tag_name: ${{ steps.unique_name.outputs.release_tag }}
+          name: ${{ steps.unique_name.outputs.release_title }}
+          # Use the notes generated in the previous step
+          body: ${{ steps.release_notes.outputs.notes }}
           files: |
             dist/*

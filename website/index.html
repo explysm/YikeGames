@@ -71,7 +71,7 @@
             </section>
 
             <section class="buttons-center">
-                <a href="https://games.yike.games"><button class="btn">Games</button></a>
+                <a href="other/games.html"><button class="btn">Games</button></a>
                 <a href="other/aboutme.html"><button class="btn">About Me</button></a>
                 <a href="other/chat.html"><button class="btn">Global Chat</button></a>
                 <a href="other/devlog.html"><button class="btn">Dev Log</button></a>
@@ -80,7 +80,7 @@
 
         <div class="right-sidebar">
             <section id="commits" class="updates">
-              <h2>Latest Website Commits</h2>
+              <h2>Latest App Commits</h2>
               <ul id="commit-list"></ul>
             </section>
               
@@ -95,7 +95,7 @@
 
     <script>
     async function loadCommits() {
-      const repo = "explysm/yikegame-website";
+      const repo = "explysm/yikegames";
       const response = await fetch(`https://api.github.com/repos/${repo}/commits`);
       const commits = await response.json();
       const list = document.getElementById("commit-list");

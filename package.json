@@ -1,6 +1,6 @@
 {
   "name": "yikegames-website-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A desktop app version of my website.",
   "main": "main.js",
   "scripts": {

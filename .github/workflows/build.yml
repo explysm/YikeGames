@@ -1,4 +1,4 @@
-name: Build and Release Electron App
+Name: Build and Release Electron App
 
 on:
   push:
@@ -71,6 +71,10 @@ jobs:
           # Set variables as outputs for the next step to consume
           echo "release_tag=$UNIQUE_TAG" >> $GITHUB_OUTPUT
           echo "release_title=$RELEASE_TITLE" >> $GITHUB_OUTPUT
+      
+      # Step 5.5 (NEW): Create the ver.txt file in the root directory for the app to read
+      - name: Save Unique Tag to ver.txt
+        run: echo "${{ steps.unique_name.outputs.release_tag }}" > ver.txt
       
       # Step 6: Generates the release notes from git commit history.
       - name: Generate Release Notes

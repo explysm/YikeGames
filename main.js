@@ -1,33 +1,68 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, dialog, shell, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
-// This function creates the main window of the application.
+// --- Version Reading Logic ---
+
+/**
+ * Reads the unique tag from the packaged ver.txt file.
+ * @returns {string} The current app tag (e.g., "biscuit-dragon").
+ */
+function getCurrentAppTag() {
+    try {
+        // Reads ver.txt which should be placed in the app's resource path (next to main.js)
+        const filePath = path.join(__dirname, 'ver.txt');
+        return fs.readFileSync(filePath, 'utf8').trim();
+    } catch (error) {
+        console.warn("Could not read ver.txt. Assuming unknown version.", error);
+        return "unknown-tag"; 
+    }
+}
+
+// --- Main Electron Application Functions ---
+
 const createWindow = () => {
-    // Create the browser window.
     const mainWindow = new BrowserWindow({
         width: 1000,
         height: 700,
         minWidth: 800,
         minHeight: 600,
         title: 'YikeGame Website',
-        // Configure webPreferences for security and to integrate with Node.js
         webPreferences: {
-            nodeIntegration: false, // Prevents renderer process from using Node.js
-            contextIsolation: true, // Isolates the Electron APIs from your website code
-            preload: path.join(__dirname, 'preload.js'), // Recommended for security
-            sandbox: true // Run the renderer process in a sandboxed environment
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js'),
+            sandbox: true,
         }
+    });
+
+    // CSS injection to hide the visual scrollbar while keeping scrolling functional
+    mainWindow.webContents.on('did-finish-load', () => {
+        const scrollbarHideCSS = `
+            /* Hide scrollbar for Webkit/Blink (Chrome, Edge, Safari, Opera) */
+            ::-webkit-scrollbar {
+                width: 0px; /* For vertical scrollbar */
+                height: 0px; /* For horizontal scrollbar */
+                background: transparent;
+            }
+            /* Optional: Hide scrollbar for IE/Edge (older) */
+            body {
+                -ms-overflow-style: none;
+            }
+            /* Optional: Hide scrollbar for Firefox (not used by Electron, but complete) */
+            body {
+                scrollbar-width: none;
+            }
+        `;
+        mainWindow.webContents.insertCSS(scrollbarHideCSS);
     });
 
     // Load your local website's index.html file from the "website" folder.
     mainWindow.loadFile(path.join(__dirname, 'website', 'index.html'));
 
-    // Uncomment the line below to automatically open the Developer Tools.
-    // This is useful for debugging your web content just like in a browser.
     // mainWindow.webContents.openDevTools();
 };
 
-// Set up the application menu.
 const createMenu = () => {
     const isMac = process.platform === 'darwin';
     const template = [
@@ -63,8 +98,12 @@ const createMenu = () => {
 app.whenReady().then(() => {
     createWindow();
     createMenu();
+    
+    // Set up the IPC handler to give the current tag to the renderer process
+    ipcMain.handle('get-current-tag', () => {
+        return getCurrentAppTag();
+    });
 
-    // Re-create the window when the dock icon is clicked (macOS behavior)
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
@@ -72,7 +111,6 @@ app.whenReady().then(() => {
     });
 });
 
-// Quit the app when all windows are closed, except on macOS.
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();

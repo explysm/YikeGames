@@ -33,7 +33,7 @@ jobs:
           npm cache clean --force
           npm install --force
 
-      # Step 4: Install Wine and 32-bit Support (FIXED)
+      # Step 4: Install Wine and 32-bit Support
       - name: Install Wine and 32-bit Support
         run: |
           # Enable 32-bit support (i386) to run Windows tools like rcedit
@@ -52,6 +52,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/heads/main')
         with:
+          # This passes the GITHUB_TOKEN to the action for authentication (The FIX)
+          token: ${{ secrets.GITHUB_TOKEN }} 
           # The name of the release.
           name: App Build (${{ github.sha }})
           # Sets a tag for this release. Using the commit hash ensures it's unique.
@@ -61,6 +63,3 @@ jobs:
           # The files to upload from the 'dist' folder.
           files: |
             dist/*
-        env:
-          # This provides the necessary token for the action to create the release.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

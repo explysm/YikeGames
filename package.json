@@ -1,43 +1,35 @@
 {
-  "name": "YikeGames",
+  "name": "yikegames-website-app",
   "version": "1.0.0",
-  "description": "Desktop version of the YikeGames website using Electron.",
+  "description": "A desktop app version of my website.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --linux --mac --win"
+    "build": "electron-builder"
   },
-  "keywords": [
-    "Electron",
-    "desktop",
-    "app",
-    "yikegame"
-  ],
-  "author": "explysm",
-  "license": "ISC",
   "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron": "^29.2.0",
+    "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.yikegame.website",
-    "productName": "YikeGame",
+    "appId": "com.yikegames.website",
+    "productName": "YikeGames",
+    "asar": true,
     "directories": {
       "output": "dist"
     },
     "files": [
       "main.js",
       "package.json",
+      "node_modules",
       "website/**/*"
     ],
-    "linux": {
-      "target": "AppImage"
-    },
-    "mac": {
-      "target": "dmg"
-    },
     "win": {
       "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
     }
   }
 }
+

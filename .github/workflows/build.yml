@@ -1,29 +1,58 @@
+name: Build and Release Electron App
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    # CRITICAL: Ensures the GITHUB_TOKEN has permission to create a release/tag
+    # CRITICAL: This is the mandatory fix for the GITHUB_TOKEN to work.
+    # It grants the workflow 'write' permissions to create a release.
     permissions:
       contents: write 
 
     steps:
-      # ... (Steps 1, 2, 3, 4 remain the same: Checkout, Setup Node, Install Deps, Install Wine)
+      # Step 1: Checks out your repository's code.
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # 5. Build and package the Electron app (The FIX is here)
+      # Step 2: Sets up a Node.js environment.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # Step 3: Installs all project dependencies.
+      - name: Install dependencies
+        run: |
+          npm cache clean --force
+          npm install --force
+
+      # Step 4: Installs Wine and 32-bit support, necessary for building Windows executables on Linux.
+      - name: Install Wine and 32-bit Support
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y wine wine32:i386
+
+      # Step 5: Runs the Electron build command. This is where the token error occurred before.
+      # The `env` block passes the GITHUB_TOKEN to the build process, satisfying any
+      # signing or publishing requirements of electron-builder.
       - name: Build and package the Electron app
         run: npm run build -- --linux --win
         env:
-          # This token satisfies electron-builder's potential need for signing/notarization
-          # or downloading helper binaries.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Redundant, but safe
 
-      # 6. Create GitHub Release (Use the fixed version from before)
+      # Step 6: Creates a new GitHub Release and uploads the build files.
+      # The `softprops/action-gh-release` action uses the token from the `with` block.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          # The softprops action requires the token to be passed via the 'with' block
           token: ${{ secrets.GITHUB_TOKEN }}
           name: App Build (${{ github.sha }})
           tag_name: build-${{ github.sha }}

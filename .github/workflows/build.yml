@@ -6,7 +6,7 @@ name: Build and Release Electron App
 on:
   push:
     branches:
-      - main # CHANGED FROM 'app' TO 'main'
+      - main
 
 # A workflow is composed of one or more jobs that can run sequentially or in parallel.
 jobs:
@@ -33,29 +33,32 @@ jobs:
           npm cache clean --force
           npm install --force
 
-      # Step 4: Runs the Electron build command.
-      # MODIFIED: We are now only building for Linux and Windows.
+      # Step 4: Install Wine for Windows cross-compilation
+      # This fixes the 'wine is required' error for the Windows build.
+      - name: Install Wine for Windows Build
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y wine
+
+      # Step 5: Runs the Electron build command.
+      # Only targets Linux and Windows.
       - name: Build and package the Electron app
         run: npm run build -- --linux --win
 
-      # Step 5: Creates a new GitHub Release and uploads the build files.
-      # This step will create a new release with a unique name based on the commit.
+      # Step 6: Creates a new GitHub Release and uploads the build files.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/heads/main') # CHANGED TO 'main'
+        if: startsWith(github.ref, 'refs/heads/main')
         with:
-          # The name of the release. This will be visible on your repository's Releases page.
+          # The name of the release.
           name: App Build (${{ github.sha }})
           # Sets a tag for this release. Using the commit hash ensures it's unique.
           tag_name: build-${{ github.sha }}
-          # The body of the release, which can contain a message.
+          # The body of the release.
           body: This is an automated build from the 'main' branch.
-          # The files to upload from the 'dist' folder created by electron-builder.
-          # The '**' is a wildcard to grab all files inside that folder.
+          # The files to upload from the 'dist' folder.
           files: |
             dist/*
         env:
           # This provides the necessary token for the action to create the release.
-          # This token is automatically provided by GitHub; you don't need to create it.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

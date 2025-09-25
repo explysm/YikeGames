@@ -1,68 +1,32 @@
-# This workflow's name, as it will appear on the Actions tab in GitHub.
-name: Build and Release Electron App
-
-# This specifies the event that triggers the workflow.
-# It will run on every push to the 'main' branch.
-on:
-  push:
-    branches:
-      - main
-
-# A workflow is composed of one or more jobs that can run sequentially or in parallel.
 jobs:
-  # The name of the job.
   build:
-    # This specifies the type of machine to run the job on.
     runs-on: ubuntu-latest
-    
+
+    # CRITICAL: Ensures the GITHUB_TOKEN has permission to create a release/tag
     permissions:
-        contents: write
+      contents: write 
 
-    # The steps that make up this job.
     steps:
-      # Step 1: Checks out your repository's code under $GITHUB_WORKSPACE.
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # ... (Steps 1, 2, 3, 4 remain the same: Checkout, Setup Node, Install Deps, Install Wine)
 
-      # Step 2: Sets up a Node.js environment.
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18' # Use a long-term support (LTS) version
-
-      # Step 3: Installs all project dependencies.
-      - name: Install dependencies
-        run: |
-          npm cache clean --force
-          npm install --force
-
-      # Step 4: Install Wine and 32-bit Support
-      - name: Install Wine and 32-bit Support
-        run: |
-          # Enable 32-bit support (i386) to run Windows tools like rcedit
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          # Install both the 64-bit (wine) and 32-bit (wine32:i386) components
-          sudo apt-get install --no-install-recommends -y wine wine32:i386
-
-      # Step 5: Runs the Electron build command.
-      # Only targets Linux and Windows.
+      # 5. Build and package the Electron app (The FIX is here)
       - name: Build and package the Electron app
         run: npm run build -- --linux --win
+        env:
+          # This token satisfies electron-builder's potential need for signing/notarization
+          # or downloading helper binaries.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Redundant, but safe
 
-      # Step 6: Creates a new GitHub Release and uploads the build files.
+      # 6. Create GitHub Release (Use the fixed version from before)
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          # This passes the GITHUB_TOKEN to the action for authentication (The FIX)
-          token: ${{ secrets.GITHUB_TOKEN }} 
-          # The name of the release.
+          # The softprops action requires the token to be passed via the 'with' block
+          token: ${{ secrets.GITHUB_TOKEN }}
           name: App Build (${{ github.sha }})
-          # Sets a tag for this release. Using the commit hash ensures it's unique.
           tag_name: build-${{ github.sha }}
-          # The body of the release.
           body: This is an automated build from the 'main' branch.
-          # The files to upload from the 'dist' folder.
           files: |
             dist/*

@@ -33,12 +33,14 @@ jobs:
           npm cache clean --force
           npm install --force
 
-      # Step 4: Install Wine for Windows cross-compilation
-      # This fixes the 'wine is required' error for the Windows build.
-      - name: Install Wine for Windows Build
+      # Step 4: Install Wine and 32-bit Support (FIXED)
+      - name: Install Wine and 32-bit Support
         run: |
+          # Enable 32-bit support (i386) to run Windows tools like rcedit
+          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y wine
+          # Install both the 64-bit (wine) and 32-bit (wine32:i386) components
+          sudo apt-get install --no-install-recommends -y wine wine32:i386
 
       # Step 5: Runs the Electron build command.
       # Only targets Linux and Windows.

@@ -38,8 +38,14 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y wine wine32:i386
+          sudo apt-get install --no-install-recommends -y wine wine wine32:i386
 
+      ## FIX: Install wordlist package to provide /usr/share/dict/words
+      - name: Install Wordlist for Release Naming
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wordlist
+          
       # Step 5: Generate unique two-word name (e.g., "biscuit-dragon")
       - name: Generate Unique Release Name
         id: unique_name
@@ -97,6 +103,7 @@ jobs:
       # Step 8: Creates a new GitHub Release and uploads the build files.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
+        # Only run this step if the build is on the main branch
         if: startsWith(github.ref, 'refs/heads/main')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -107,3 +114,4 @@ jobs:
           body: ${{ steps.release_notes.outputs.notes }}
           files: |
             dist/*
+

@@ -40,17 +40,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y wine wine wine32:i386
 
-      ## FIX: Install wordlist package to provide /usr/share/dict/words
-      - name: Install Wordlist for Release Naming
+      ## FIX: Install wamerican package to provide /usr/share/dict/words
+      - name: Install Dictionary for Release Naming
         run: |
+          # Use 'wamerican' which provides the dictionary file on modern Ubuntu/Debian
           sudo apt-get update
-          sudo apt-get install -y wordlist
+          sudo apt-get install -y wamerican
           
       # Step 5: Generate unique two-word name (e.g., "biscuit-dragon")
       - name: Generate Unique Release Name
         id: unique_name
         run: |
           # Get the total number of words in the dictionary file
+          # wamerican installs a symlink to /usr/share/dict/words
           WORD_COUNT=$(wc -l < /usr/share/dict/words)
           
           # Generate two unique random line numbers

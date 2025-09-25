@@ -33,12 +33,26 @@ jobs:
           npm cache clean --force
           npm install --force
 
-      # Step 4: Installs Wine and 32-bit support (i386) for Windows cross-compilation.
-      - name: Install Wine and 32-bit Support
+      # =================================================================
+      # 🛑 CRITICAL FIX: Correct Wine Installation for cross-compilation
+      # =================================================================
+      - name: Install Wine (for Windows Cross-Compiling)
         run: |
+          # 1. Add i386 architecture
           sudo dpkg --add-architecture i386
+          
+          # 2. Download and add the official Wine repository key
+          sudo mkdir -pm755 /etc/apt/keyrings
+          sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+          
+          # 3. Add the Wine repository for Ubuntu 22.04 (jammy)
+          sudo wget -O /etc/apt/sources.list.d/winehq-jammy.sources https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+          
+          # 4. Update and install the staging branch (required by electron-builder)
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y wine wine wine32:i386
+          sudo apt-get install --install-recommends -y winehq-staging
+          
+      # =================================================================
 
       ## FIX: Install wamerican package to provide /usr/share/dict/words
       - name: Install Dictionary for Release Naming
@@ -71,11 +85,11 @@ jobs:
           # Set variables as outputs for the next step to consume
           echo "release_tag=$UNIQUE_TAG" >> $GITHUB_OUTPUT
           echo "release_title=$RELEASE_TITLE" >> $GITHUB_OUTPUT
-      
-      # Step 5.5 (NEW): Create the ver.txt file in the root directory for the app to read
+          
+      # Step 5.5: Create the ver.txt file in the root directory for the app to read
       - name: Save Unique Tag to ver.txt
         run: echo "${{ steps.unique_name.outputs.release_tag }}" > ver.txt
-      
+        
       # Step 6: Generates the release notes from git commit history.
       - name: Generate Release Notes
         id: release_notes
@@ -97,7 +111,7 @@ jobs:
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      
+          
       # Step 7: Runs the Electron build command.
       - name: Build and package the Electron app
         run: npm run build -- --linux --win
@@ -105,6 +119,13 @@ jobs:
           # Passes the tokens required by electron-builder for signing/notarization
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      # =================================================================
+      # ✅ LOGICAL IMPROVEMENT: Clean up the generated file after build
+      # =================================================================
+      - name: Clean up ver.txt file
+        run: rm ver.txt
+      # =================================================================
 
       # Step 8: Creates a new GitHub Release and uploads the build files.
       - name: Create GitHub Release
@@ -120,4 +141,3 @@ jobs:
           body: ${{ steps.release_notes.outputs.notes }}
           files: |
             dist/*
-

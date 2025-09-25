@@ -778,6 +778,8 @@ body.chat-page, body.forums-page {
     to { transform: rotate(360deg); }
 }
 
+/* ... (rest of CSS remains the same above this section) ... */
+
 /* Game Card Styling */
 .game-card {
     background: rgba(0, 0, 0, 0.5);
@@ -793,43 +795,82 @@ body.chat-page, body.forums-page {
     box-shadow: 0 5px 25px #01edf0;
 }
 
+/* 1. Outer Container: Establishes relative position and aspect ratio */
 .game-card-image-container {
     position: relative;
     width: 100%;
     /* 16:9 aspect ratio for covers */
     padding-bottom: 56.25%; 
     overflow: hidden;
+    z-index: 1; 
 }
 
+/* 🔥 2. New Element: The Blurred Background Layer (Absolute Positioned) */
+.game-card-image-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Apply the blur and slight zoom here only */
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    transform: scale(1.02); /* Slight zoom to hide blur edges */
+    opacity: 0.8;
+    z-index: 1; 
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+/* 🔥 3. The Foreground Image Layer (Absolute Positioned, Crisp) */
 .game-card-image {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    
+    /* CRITICAL: Use 'contain' to ensure the main image is NOT zoomed/cropped */
+    object-fit: contain;
+    
+    /* Ensure it is on top of the blurred background */
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.4); /* Fills empty space if image is transparent */
+    
     display: block;
     transition: opacity 0.3s ease;
+    
+    /* Ensure no residual filters/transforms from the parent */
+    filter: none; 
+    transform: none; 
 }
+
+/* --- Updated Game Card Content Styles --- */
 
 .game-card-content {
     padding: 15px;
     text-align: left;
 }
 
+/* Updated Title Style */
 .game-card-title {
     font-size: 1.8rem;
     margin-bottom: 5px;
-    color: #fff;
-    text-shadow: 0 0 5px #01edf0;
+    color: #fff; /* White for high contrast */
+    text-shadow: 0 0 8px #01edf0; /* Stronger neon glow */
+    letter-spacing: 1px;
 }
 
+/* Updated Description Style */
 .game-card-description {
     font-size: 1rem;
-    color: #01edf0;
+    color: #01edf0; /* Neon color for body text */
     margin-bottom: 10px;
-    opacity: 0.8;
-    /* Truncate description */
+    opacity: 0.9; /* Slightly more opaque for better readability */
+    line-height: 1.4;
+    
+    /* Truncate description (Keep this for clean card layout) */
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -840,28 +881,39 @@ body.chat-page, body.forums-page {
 .game-card-author {
     font-size: 0.9rem;
     color: #fff;
-    opacity: 0.6;
+    opacity: 0.7; /* Subtle white text */
     display: block;
     margin-bottom: 15px;
 }
 
+/* 🔥 The Download Button FIX 🔥 */
 .game-card-link {
     display: block;
     text-align: center;
-    background-color: #01edf0;
-    color: #0b1a2a;
+    
+    /* Neon button style */
+    background-color: transparent; /* Make it transparent */
+    color: #01edf0; /* Neon text */
+    border: 2px solid #01edf0; /* Neon border */
     text-decoration: none;
     padding: 10px 15px;
     font-weight: bold;
-    border-radius: 0;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0; /* Sharp corners */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5); /* Initial glow */
 }
 
 .game-card-link:hover {
-    background-color: #47f7f9;
-    box-shadow: 0 0 20px #01edf0;
+    background-color: rgba(1, 237, 240, 0.2); /* Slight fill on hover */
+    box-shadow: 0 0 20px #01edf0; /* Enhanced glow on hover */
+    transform: translateY(-2px); /* Slight lift */
 }
 
+/* ... (Rest of CSS) ... */
+
+/* ... (rest of CSS remains the same below this section) ... */
 /* --- Developer Overlay (Edit/Delete Buttons) --- */
 .developer-overlay {
     position: absolute;
@@ -875,6 +927,7 @@ body.chat-page, body.forums-page {
     align-items: center;
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 3; /* Above the image and background */
 }
 
 .game-card:hover .developer-overlay {
@@ -1093,4 +1146,3 @@ body.chat-page, body.forums-page {
         padding: 20px;
     }
 }
-

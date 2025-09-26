@@ -22,46 +22,47 @@ function getCurrentAppTag() {
 // --- Main Electron Application Functions ---
 
 const createWindow = () => {
+    // ... (BrowserWindow setup)
+
     const mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 700,
-        minWidth: 800,
-        minHeight: 600,
-        title: 'YikeGame Website',
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js'),
-            sandbox: true,
+        // ... (your existing options)
+    });
+
+    // Load your local website
+    mainWindow.loadFile(path.join(__dirname, 'website', 'index.html'));
+
+    // 🏆 AGGRESSIVE FOCUS RECOVERY FIX
+    // Use the 'focus' event to force focus back to webContents via a deferred call.
+    mainWindow.on('focus', () => {
+        // This is the CRITICAL line. setImmediate runs after the current
+        // queue finishes, ensuring the OS has finished re-focusing the window
+        // before we tell the web contents to focus.
+        if (mainWindow.webContents) {
+            setImmediate(() => {
+                mainWindow.webContents.focus();
+            });
         }
     });
 
-    // CSS injection to hide the visual scrollbar while keeping scrolling functional
+    // ... (did-finish-load handler for initial CSS/Focus)
     mainWindow.webContents.on('did-finish-load', () => {
-        const scrollbarHideCSS = `
-            /* Hide scrollbar for Webkit/Blink (Chrome, Edge, Safari, Opera) */
-            ::-webkit-scrollbar {
-                width: 0px; /* For vertical scrollbar */
-                height: 0px; /* For horizontal scrollbar */
-                background: transparent;
-            }
-            /* Optional: Hide scrollbar for IE/Edge (older) */
-            body {
-                -ms-overflow-style: none;
-            }
-            /* Optional: Hide scrollbar for Firefox (not used by Electron, but complete) */
-            body {
-                scrollbar-width: none;
-            }
-        `;
-        mainWindow.webContents.insertCSS(scrollbarHideCSS);
+        // ... (CSS injection)
+
+        // Ensure the window is fully focused after the content loads
+        if (!mainWindow.isFocused()) {
+            mainWindow.focus();
+        }
+        
+        // Final safety focus on the web contents
+        if (mainWindow.webContents) {
+             mainWindow.webContents.focus();
+        }
     });
 
-    // Load your local website's index.html file from the "website" folder.
-    mainWindow.loadFile(path.join(__dirname, 'website', 'index.html'));
-
-    // mainWindow.webContents.openDevTools();
+    // ... (rest of the createWindow function)
 };
+
+
 
 const createMenu = () => {
     const isMac = process.platform === 'darwin';

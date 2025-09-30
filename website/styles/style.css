@@ -1,5 +1,7 @@
 /* --- Retro Futurism Vibe (Original CSS) --- */
-
+  .fade-enter { opacity: 0; }
+  .fade-enter-active { opacity: 1; transition: opacity 0.5s ease; }
+  .fade-exit-active { opacity: 0; transition: opacity 0.5s ease; }
 /* Basic Reset & Font */
 * {
     box-sizing: border-box;
@@ -9,6 +11,8 @@
 
 /* Base Body Styles */
 body {
+    scrollbar-width: thin;
+    scrollbar-color: #01edf0 #0a141f;
     /* Background with scanlines and noise for a vintage CRT feel */
     background-color: #0b1a2a;
     background-image:
@@ -331,30 +335,6 @@ body.chat-page, body.forums-page {
     background-size: 2px 2px, 2px 2px, 100% 4px, 4px 100%;
 }
 
-#chat-container {
-    max-width: 800px;
-    width: 100%;
-    height: 400px;
-    overflow-y: auto;
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid #01edf0;
-    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 20px auto;
-}
-
-#chat-container .forum-thread {
-    background: #0d283c;
-    border: 1px solid #01edf0;
-    padding: 12px 15px;
-    text-align: left;
-    max-width: 100%;
-    font-size: 1rem;
-    box-shadow: 0 0 5px rgba(1, 237, 240, 0.5);
-}
 
 /* --- Scrollbar --- */
 #chat-container::-webkit-scrollbar {

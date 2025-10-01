@@ -126,7 +126,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         # Only run this step if the build is on the main branch
-        if: startsWith(github.ref, 'refs/heads/main')
+        if: startsWith(github.ref, 'refs/heads/app')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # Use the new unique words generated in Step 5

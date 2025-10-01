@@ -1,0 +1,89 @@
+{
+  "rules": {
+    "users": {
+      ".indexOn": ["email", "displayName", "isDeveloper"],
+      ".read": "auth.uid !== null",
+      
+      "$uid": {
+        ".write": "auth.uid === $uid || root.child('users').child(auth.uid).child('isDeveloper').val() === true",
+
+        "displayName": {
+          ".read": true,
+          ".validate": "newData.isString()"
+        },
+        "photoURL": {
+          ".read": true,
+          ".validate": "newData.isString() || newData.val() === null"
+        },
+        "profile": {
+          ".read": true,
+          "description": {
+            ".validate": "newData.isString() && newData.val().length < 500"
+          },
+          "socials": {
+            "twitter": { ".validate": "newData.isString()" },
+            "github": { ".validate": "newData.isString()" },
+            "$other": { ".validate": false }
+          },
+          "friendRequests": {
+            ".validate": "newData.hasChildren()"
+          },
+          "profileViews": {
+            ".validate": "newData.isNumber()"
+          }
+        },
+        "friends": {
+          ".validate": "newData.hasChildren()"
+        },
+        "isDeveloper": {
+          ".read": true,
+          ".validate": "newData.isBoolean()"
+        },
+        "online": {
+          ".read": true,
+          ".validate": "newData.isBoolean()"
+        },
+        "typing": {
+          ".read": true,
+          ".validate": "newData.isBoolean()"
+        },
+        "email": {
+          ".read": "auth.uid === $uid",
+          ".validate": "newData.isString()"
+        }
+      }
+    },
+
+    "usernames": {
+      ".read": true,
+      ".write": "auth.uid !== null",
+      "$username": {
+        ".validate": "newData.val() === auth.uid"
+      }
+    },
+
+    "posts": {
+      ".read": true,
+      ".write": "auth.uid !== null"
+    },
+
+    "global-chat": {
+      ".read": true,
+      ".write": "auth.uid !== null",
+      ".indexOn": "timestamp"
+    },
+
+    "presence": {
+      ".read": true,
+      ".write": "auth.uid !== null",
+      "$uid": {
+        ".validate": "auth.uid === $uid"
+      }
+    },
+
+    "games": {
+      ".read": true,
+      ".write": "root.child('users').child(auth.uid).child('isDeveloper').val() === true"
+    }
+  }
+}

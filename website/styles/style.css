@@ -157,12 +157,36 @@ header a:hover, .navigation a:hover {
 }
 
 /* --- Buttons --- */
-.buttons-center {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+.main-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
+    width: 100%;
+    max-width: 800px;
     margin-bottom: 50px;
+}
+
+.nav-btn {
+    background-color: rgba(1, 237, 240, 0.1);
+    border: 2px solid #01edf0;
+    color: #01edf0;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    text-shadow: 0 0 5px #01edf0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.nav-btn:hover {
+    background-color: rgba(1, 237, 240, 0.3);
+    box-shadow: 0 0 25px #01edf0;
+    transform: scale(1.05);
 }
 
 /* The primary button style, used for links or buttons */
@@ -188,10 +212,6 @@ header a:hover, .navigation a:hover {
 }
 
 /* NEW: Specialized button style for Navigation links that need the full button look */
-.nav-btn {
-    /* Inherits all .btn styles */
-    /* If you need any slight variation from .btn, add it here */
-}
 
 /* Specific buttons, keeping the neon theme */
 .login-btn, #send-btn {
@@ -326,7 +346,25 @@ header a:hover, .navigation a:hover {
 }
 
 
-/* --- Global Chat --- */
+/* --- Notifications --- */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.notification {
+    background-color: #333;
+    color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+/* --- Social --- */
 body.chat-page, body.forums-page {
     background-image:
         linear-gradient(rgba(1, 237, 240, 0.05) 1px, transparent 1px),
@@ -430,6 +468,81 @@ body.chat-page, body.forums-page {
     .new-post-form textarea {
         width: 100%;
         min-width: 100%;
+    }
+
+    /* Account Page (account.html) */
+    .account-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-width: unset;
+        margin-bottom: 20px;
+    }
+
+    .user-card {
+        padding: 15px;
+    }
+
+    .user-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .user-card p {
+        font-size: 0.9rem;
+    }
+
+    .account-nav {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .account-nav .nav-item {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    .logout-btn-container {
+        width: 100%;
+        padding: 0 15px;
+    }
+
+    .logout-btn-container .btn {
+        width: 100%;
+        font-size: 1.2rem;
+        padding: 10px;
+    }
+
+    .main-content {
+        width: 100%;
+        min-width: unset;
+        padding: 10px;
+    }
+
+    .tab-content h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .form-group label {
+        font-size: 0.95rem;
+    }
+
+    .input-field {
+        font-size: 1rem;
+        padding: 8px;
+    }
+
+    .username-btn, .pfp-btn {
+        font-size: 1.1rem;
+        padding: 8px 15px;
     }
 }
 

@@ -119,11 +119,11 @@ onAuthStateChanged(auth, user => {
 });
 
 // --- Fetch GitHub Commits ---
-async function loadCommits(repo, listId) {
+async function loadCommits(repo, listId, branch = 'main') {
     const list = document.getElementById(listId);
     list.innerHTML = "<li>Loading commits...</li>";
     try {
-        const res = await fetch(`https://api.github.com/repos/${repo}/commits`);
+        const res = await fetch(`https://api.github.com/repos/${repo}/commits?sha=${branch}`);
         const commits = await res.json();
         list.innerHTML = "";
         commits.slice(0,5).forEach(c => {
@@ -174,7 +174,7 @@ function toggleCommits(showId) {
 // --- DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', () => {
     // Load commits
-    loadCommits("explysm/yikegames","commit-list");
+    loadCommits("explysm/yikegames","commit-list", "app");
     loadCommits("explysm/Games","commit-list-games");
 
     // Toggle buttons
@@ -257,6 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
 
+    <div id="notification-container" class="hidden"></div>
+
     <header>
         <h1>Welcome to the home page!</h1>
         <p class="subtitle">Go to any section using the buttons below</p>
@@ -286,12 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <a id="login-register-btn" href="account/login.html"><button class="btn login-btn">Login / Register</button></a>
             </section>
 
-            <section class="buttons-center">
-                <a href="info/games.html"><button class="btn">Games</button></a>
-                <a href="info/aboutme.html"><button class="btn">About Me</button></a>
-                <a href="community/chat.html"><button class="btn">Global Chat</button></a>
-                <a href="community/devlog.html"><button class="btn">Dev Log</button></a>
-            </section>
+            <nav class="main-nav">
+                <a href="info/games.html" class="nav-btn">Games</a>
+                <a href="info/aboutme.html" class="nav-btn">About Me</a>
+                <a href="community/chat.html" class="nav-btn">Social</a>
+                <a href="community/devlog.html" class="nav-btn">Dev Log</a>
+            </nav>
         </div>
 
         <div class="right-sidebar">
@@ -314,6 +316,51 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <div class="divider"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+            authDomain: "yikegames-website.firebaseapp.com",
+            projectId: "yikegames-website",
+            databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+            storageBucket: "yikegames-website.firebasestorage.app",
+            messagingSenderId: "1086586566551",
+            appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+            measurementId: "G-FXH0D07D86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const friendRequestsRef = ref(db, `users/${user.uid}/profile/friendRequests`);
+                onChildAdded(friendRequestsRef, (snapshot) => {
+                    const notificationContainer = document.getElementById('notification-container');
+                    const notification = document.createElement('div');
+                    notification.classList.add('notification');
+                    notification.innerHTML = `
+                        <p>You have a new friend request!</p>
+                        <a href="/account/profile.html?uid=${snapshot.key}">View Profile</a>
+                    `;
+                    notificationContainer.appendChild(notification);
+                    notificationContainer.classList.remove('hidden');
+
+                    setTimeout(() => {
+                        notification.remove();
+                        if (notificationContainer.children.length === 0) {
+                            notificationContainer.classList.add('hidden');
+                        }
+                    }, 5000);
+                });
+            }
+        });
+    </script>
+
 </body>
 </html>
 

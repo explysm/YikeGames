@@ -1,6 +1,6 @@
-# YikeGames Desktop App
+# YikeGames App
 
-Welcome to the YikeGames Desktop App repository! This project is an Electron-based application that serves as a retro-inspired web app and a dedicated browser for games hosted on yikegames.itch.io.
+Welcome to the YikeGames App repository! This project is an Electron-based application that serves as a retro-inspired web app and a dedicated browser for games hosted on yikegames.itch.io.
 
 ## Features
 
@@ -17,11 +17,11 @@ Welcome to the YikeGames Desktop App repository! This project is an Electron-bas
     *   User Login
     *   Profile Viewing
     *   Profile Editing
-*   **Discord Webhook Integration**: Enhanced features related to Discord webhook payloads.
+*   **Discord Webhook Integration**: Global chat messages are sent to the discord server. why? I have no idea, just thought it would be cool.
 
 ## Getting Started
 
-Further instructions on setting up and running the application will be provided here.
+To download the app, go to [releases](https://github.com/explysm/yikegames/releases) and pick the executable for your OS. 
 
 ## License
 

@@ -1,0 +1,8 @@
+# Folders
+electron/
+
+# Files
+gemini.js
+
+# Env
+.env/

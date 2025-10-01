@@ -227,7 +227,7 @@
           const snapshot = await get(userRef);
           const userData = snapshot.val();
 
-          if (userData && userData.isDeveloper) {
+          if (userData && userData.isDeveloper === true) {
               devManagementSection.style.display = "flex";
           } else {
               devManagementSection.style.display = "none";

@@ -310,7 +310,7 @@
                     const snapshot = await get(userRef);
                     
                     const isDeveloperBefore = currentUserIsDeveloper; // Store previous state
-                    currentUserIsDeveloper = snapshot.exists() ? snapshot.val().isDeveloper || false : false;
+                    currentUserIsDeveloper = snapshot.exists() ? snapshot.val().isDeveloper === true : false;
                     
                     if (currentUserIsDeveloper) {
                         developerControls.classList.remove('hidden');

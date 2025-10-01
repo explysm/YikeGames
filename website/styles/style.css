@@ -7,12 +7,13 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    /* Global scrollbar styling for Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(1, 237, 240, 0.4) transparent;
 }
 
 /* Base Body Styles */
 body {
-    scrollbar-width: thin;
-    scrollbar-color: #01edf0 #0a141f;
     /* Background with scanlines and noise for a vintage CRT feel */
     background-color: #0b1a2a;
     background-image:
@@ -337,24 +338,7 @@ body.chat-page, body.forums-page {
 
 
 /* --- Scrollbar --- */
-#chat-container::-webkit-scrollbar {
-    width: 12px;
-}
-#chat-container::-webkit-scrollbar-track {
-    background: #0a141f;
-}
-#chat-container::-webkit-scrollbar-thumb {
-    background: #01edf0;
-    border: 2px solid #0a141f;
-}
-#chat-container::-webkit-scrollbar-thumb:hover {
-    background: #47f7f9;
-}
-/* Firefox scrollbar */
-#chat-container {
-    scrollbar-width: thin;
-    scrollbar-color: #01edf0 #0a141f;
-}
+/* Scrollbar styles are now handled globally */
 
 /* --- Retro Input Fields --- */
 .input-field, #message-input {
@@ -1125,4 +1109,30 @@ body.chat-page, body.forums-page {
     .modal-content {
         padding: 20px;
     }
+}
+
+
+/* --- Global Scrollbar Styles (Webkit) --- */
+/* Applies to all scrollable elements for a native, unobtrusive look */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(1, 237, 240, 0.4);
+    border-radius: 0;
+    border: 1px solid rgba(1, 237, 240, 0.6);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(71, 247, 249, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
 }

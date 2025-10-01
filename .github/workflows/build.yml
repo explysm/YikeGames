@@ -76,7 +76,7 @@ jobs:
       - name: Save Unique Tag to ver.txt
         run: echo "${{ steps.unique_name.outputs.release_tag }}" > ver.txt
       
-      # Step 6: Generates the release notes from git commit history.
+      # Step 6: Generates more detailed release notes from git commit history.
       - name: Generate Release Notes
         id: release_notes
         run: |
@@ -90,12 +90,28 @@ jobs:
             PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
           fi
           
-          # Get the commit messages, formatted as a bulleted list
-          NOTES=$(git log --pretty=format:"- %s" ${PREVIOUS_TAG}..HEAD)
+          # Generate detailed release notes
+          CHANGELOG=""
+          # Use reverse to get oldest commits first
+          for hash in $(git rev-list --reverse ${PREVIOUS_TAG}..HEAD); do
+            subject=$(git log -1 --pretty=%s $hash)
+            body=$(git log -1 --pretty=%b $hash)
+            
+            CHANGELOG+="* **$subject**"
+            CHANGELOG+=$'\n'
+            
+            if [[ -n "$body" ]]; then
+              # Add indentation to the body and format it as a blockquote
+              indented_body=$(echo "$body" | sed 's/^/  > /')
+              CHANGELOG+="$indented_body"
+              CHANGELOG+=$'\n'
+            fi
+            CHANGELOG+=$'\n'
+          done
           
           # Pass the notes to the next step
           echo "notes<<EOF" >> $GITHUB_OUTPUT
-          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo -e "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
       
       # Step 7: Runs the Electron build command.

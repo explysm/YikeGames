@@ -23,10 +23,6 @@ Welcome to the YikeGames Desktop App repository! This project is an Electron-bas
 
 Further instructions on setting up and running the application will be provided here.
 
-## Contributing
-
-We welcome contributions! Please refer to our contribution guidelines for more information.
-
 ## License
 
-This project is licensed under [License Name]. See the `LICENSE` file for details.
+This project is licensed under the MIT License. See the [LICENSE.md](LICENSE.md) file for details.

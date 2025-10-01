@@ -39,77 +39,224 @@
     display: block; /* Show active container */
 }
 /* --- END New CSS --- */
+
+/* --- Commit Details/Summary Styles --- */
+details {
+  margin-bottom: 10px;
+}
+summary {
+  cursor: pointer;
+  outline: none;
+  color: #01edf0;
+}
+summary:hover {
+  text-decoration: underline;
+}
+details[open] summary {
+  margin-bottom: 5px;
+}
+details pre {
+  background-color: rgba(0,0,0,0.2);
+  padding: 10px;
+  border-left: 2px solid #01edf0;
+  margin-top: 5px;
+  color: #fff;
+}
 </style>
 
 <script type="module">
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getDatabase, ref, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
-      authDomain: "yikegames-website.firebaseapp.com",
-      projectId: "yikegames-website",
-      storageBucket: "yikegames-website.firebasestorage.app",
-      messagingSenderId: "1086586566551",
-      appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
-      measurementId: "G-FXH0D07D86"
-    };
+// --- Firebase Config ---
+const firebaseConfig = {
+    apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+    authDomain: "yikegames-website.firebaseapp.com",
+    projectId: "yikegames-website",
+    databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+    storageBucket: "yikegames-website.firebasestorage.app",
+    messagingSenderId: "1086586566551",
+    appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+    measurementId: "G-FXH0D07D86"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    
-    // --- Update Check Function for Renderer Process ---
-    async function checkForNewRelease() {
-        // Only run if the application is running in the Electron environment
-        if (typeof window.electronAPI === 'undefined') {
-            return;
-        }
-
+// --- Electron Update Notification ---
+async function checkForNewRelease() {
+    if (typeof window.electronAPI === 'undefined') return;
+    try {
         const CURRENT_TAG = await window.electronAPI.getCurrentTag();
-        const REPO = "explysm/yikegames"; 
-        const notificationArea = document.getElementById("update-notification");
-
         if (CURRENT_TAG === "unknown-tag") return;
 
-        try {
-            const response = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`);
-            if (!response.ok) throw new Error("GitHub API failed to fetch release.");
+        const REPO = "explysm/yikegames";
+        const notificationArea = document.getElementById("update-notification");
+        const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`);
+        const latestRelease = await res.json();
+        const LATEST_TAG = latestRelease.tag_name;
 
-            const latestRelease = await response.json();
-            const LATEST_TAG = latestRelease.tag_name;
-
-            if (LATEST_TAG !== CURRENT_TAG) {
-                notificationArea.style.display = 'block';
-                notificationArea.innerHTML = `
-                    <p class="warning1" style="color: red; font-weight: bold;">
-                        📢 New App Update Available! Your version: ${CURRENT_TAG}, Latest: 
-                        <a href="${latestRelease.html_url}" target="_blank">Version ${LATEST_TAG}</a>.
-                    </p>`;
-            }
-        } catch (error) {
-            console.error("Error checking for updates:", error);
+        if (LATEST_TAG !== CURRENT_TAG) {
+            notificationArea.style.display = 'block';
+            notificationArea.innerHTML = `
+                <p class="warning1" style="color: red; font-weight: bold;">
+                    📢 New App Update Available! Your version: ${CURRENT_TAG}, Latest: 
+                    <a href="${latestRelease.html_url}" target="_blank">Version ${LATEST_TAG}</a>.
+                </p>`;
         }
-    }
-    // --- END: Update Check Function ---
+    } catch (err) { console.error("Update check error:", err); }
+}
 
-    onAuthStateChanged(auth, (user) => {
-      // ...inside onAuthStateChanged...
-      const loginBtnAnchor = document.getElementById("login-register-btn");
-      const loginBtnButton = loginBtnAnchor.querySelector('button');
-
-      if (user) {
-       if (loginBtnButton) {
+// --- Auth State Update ---
+onAuthStateChanged(auth, user => {
+    const loginBtnAnchor = document.getElementById("login-register-btn");
+    const loginBtnButton = loginBtnAnchor.querySelector('button');
+    if (user && loginBtnButton) {
         loginBtnButton.textContent = "Account";
-        loginBtnAnchor.href = "other/account.html";
-       }
-      }
+        loginBtnAnchor.href = "account/account.html";
+    }
+});
+
+// --- Fetch GitHub Commits ---
+async function loadCommits(repo, listId) {
+    const list = document.getElementById(listId);
+    list.innerHTML = "<li>Loading commits...</li>";
+    try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/commits`);
+        const commits = await res.json();
+        list.innerHTML = "";
+        commits.slice(0,5).forEach(c => {
+            const li = document.createElement("li");
+            const lines = c.commit.message.split('\n');
+            const title = lines[0];
+            const body = lines.slice(1).join('\n').trim();
+            if (body) {
+                li.innerHTML = `
+                <details>
+                    <summary><strong>${c.commit.author.name}</strong>: ${title}</summary>
+                    <pre style="white-space: pre-wrap; font-family: inherit;">${body}</pre>
+                    <small>${new Date(c.commit.author.date).toLocaleString()}</small>
+                </details>`;
+            } else {
+                li.innerHTML = `<strong>${c.commit.author.name}</strong>: ${title}<br>
+                <small>${new Date(c.commit.author.date).toLocaleString()}</small>`;
+            }
+            list.appendChild(li);
+        });
+    } catch (err) { 
+        console.error("Commit fetch error:", err);
+        list.innerHTML = "<li>Could not load commits.</li>";
+    }
+}
+
+// --- Commit Toggle ---
+function toggleCommits(showId) {
+    const appContainer = document.getElementById('app-commits-container');
+    const gameContainer = document.getElementById('game-commits-container');
+    const appButton = document.getElementById('toggle-app-commits');
+    const gameButton = document.getElementById('toggle-game-commits');
+
+    appContainer.classList.remove('active');
+    gameContainer.classList.remove('active');
+    appButton.classList.remove('active');
+    gameButton.classList.remove('active');
+
+    if (showId === 'app-commits-container') {
+        appContainer.classList.add('active');
+        appButton.classList.add('active');
+    } else if (showId === 'game-commits-container') {
+        gameContainer.classList.add('active');
+        gameButton.classList.add('active');
+    }
+}
+
+// --- DOMContentLoaded ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Load commits
+    loadCommits("explysm/yikegames","commit-list");
+    loadCommits("explysm/Games","commit-list-games");
+
+    // Toggle buttons
+    document.getElementById('toggle-app-commits').addEventListener('click', () => toggleCommits('app-commits-container'));
+    document.getElementById('toggle-game-commits').addEventListener('click', () => toggleCommits('game-commits-container'));
+
+    toggleCommits('app-commits-container');
+
+    // Search modal
+    const searchIcon = document.getElementById('search-icon');
+    const searchModal = document.getElementById('search-modal');
+    const closeSearchModalBtn = document.getElementById('close-search-modal');
+    const searchForm = document.getElementById('search-form');
+    const searchUsernameInput = document.getElementById('search-username');
+    const searchStatus = document.getElementById('search-status');
+
+    searchIcon.addEventListener('click', () => searchModal.classList.remove('hidden'));
+    closeSearchModalBtn.addEventListener('click', () => searchModal.classList.add('hidden'));
+
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = searchUsernameInput.value.trim();
+        if (!username) return;
+
+        searchStatus.textContent = 'Searching...';
+        try {
+            const usersRef = ref(db, 'users');
+            const userQuery = query(usersRef, orderByChild('displayName'), equalTo(username));
+            const snapshot = await get(userQuery);
+
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                const userId = Object.keys(userData)[0];
+                window.location.href = `account/profile.html?uid=${userId}`;
+            } else {
+                searchStatus.textContent = `User "${username}" not found.`;
+            }
+        } catch (err) {
+            console.error(err);
+            searchStatus.textContent = 'Error searching for user.';
+        }
     });
 
-    // Call the update check when the script loads
+    // Fade transitions
+    document.body.classList.add('fade-enter');
+    setTimeout(() => document.body.classList.add('fade-enter-active'), 10);
+    document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href && !href.startsWith('http')) {
+                e.preventDefault();
+                document.body.classList.remove('fade-enter-active');
+                document.body.classList.add('fade-exit-active');
+                setTimeout(() => { window.location.href = href; }, 500);
+            }
+        });
+    });
+
+    // Run Electron update check
     checkForNewRelease();
+});
 </script>
 </head>
 <body>
+    <div id="search-icon" class="search-icon-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </div>
+
+    <div id="search-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Search for a User</h2>
+                <button id="close-search-modal" class="close-modal-btn">X</button>
+            </div>
+            <form id="search-form" class="form-field-group">
+                <input type="text" id="search-username" placeholder="Enter username" required class="input-field">
+                <button type="submit" class="btn">Search</button>
+            </form>
+            <p id="search-status"></p>
+        </div>
+    </div>
+
     <header>
         <h1>Welcome to the home page!</h1>
         <p class="subtitle">Go to any section using the buttons below</p>
@@ -136,14 +283,14 @@
             <section id="update-notification" class="warning" style="display:none; margin-bottom: 15px;"></section>
 
             <section class="login-container">
-                <a id="login-register-btn" href="other/login.html"><button class="btn login-btn">Login / Register</button></a>
+                <a id="login-register-btn" href="account/login.html"><button class="btn login-btn">Login / Register</button></a>
             </section>
 
             <section class="buttons-center">
-                <a href="other/games.html"><button class="btn">Games</button></a>
-                <a href="other/aboutme.html"><button class="btn">About Me</button></a>
-                <a href="other/chat.html"><button class="btn">Global Chat</button></a>
-                <a href="other/devlog.html"><button class="btn">Dev Log</button></a>
+                <a href="info/games.html"><button class="btn">Games</button></a>
+                <a href="info/aboutme.html"><button class="btn">About Me</button></a>
+                <a href="community/chat.html"><button class="btn">Global Chat</button></a>
+                <a href="community/devlog.html"><button class="btn">Dev Log</button></a>
             </section>
         </div>
 
@@ -167,121 +314,6 @@
     </div>
 
     <div class="divider"></div>
-
-    <script>
-    /**
-     * Toggles the display of the commit lists and updates the button's active state.
-     * @param {string} showId - The ID of the container to show ('app-commits-container' or 'game-commits-container').
-     */
-    function toggleCommits(showId) {
-        const appContainer = document.getElementById('app-commits-container');
-        const gameContainer = document.getElementById('game-commits-container');
-        const appButton = document.getElementById('toggle-app-commits');
-        const gameButton = document.getElementById('toggle-game-commits');
-
-        // Hide both and remove active class from buttons
-        appContainer.classList.remove('active');
-        gameContainer.classList.remove('active');
-        appButton.classList.remove('active');
-        gameButton.classList.remove('active');
-
-        // Show the selected container and set its button as active
-        if (showId === 'app-commits-container') {
-            appContainer.classList.add('active');
-            appButton.classList.add('active');
-        } else if (showId === 'game-commits-container') {
-            gameContainer.classList.add('active');
-            gameButton.classList.add('active');
-        }
-    }
-
-    /** Fetches and displays the latest App Commits */
-    async function loadAppCommits() {
-      const repo = "explysm/yikegames"; 
-      const list = document.getElementById("commit-list");
-      list.innerHTML = "<li>Loading App commits...</li>"; 
-
-      try {
-        const commitResponse = await fetch(`https://api.github.com/repos/${repo}/commits`);
-        const commits = await commitResponse.json();
-        
-        list.innerHTML = ""; // Clear loading message
-        commits.slice(0, 5).forEach(c => {
-          const li = document.createElement("li");
-          li.innerHTML = `<strong>${c.commit.author.name}</strong>: ${c.commit.message} 
-                          <br><small>${new Date(c.commit.author.date).toLocaleString()}</small>`;
-          list.appendChild(li);
-        });
-
-      } catch (error) {
-        console.error("Error fetching GitHub App data:", error);
-        list.innerHTML = "<li>Could not load App updates.</li>";
-      }
-    }
-
-    /** Fetches and displays the latest Game Commits */
-    async function loadGameCommits() {
-      const repo = "explysm/Games";
-      const list = document.getElementById("commit-list-games");
-      list.innerHTML = "<li>Loading Game commits...</li>";
-      try {
-          const response = await fetch(`https://api.github.com/repos/${repo}/commits`);
-          const commits = await response.json();
-          
-          list.innerHTML = ""; // Clear loading message
-          commits.slice(0, 5).forEach(c => {
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${c.commit.author.name}</strong>: ${c.commit.message} 
-                            <br><small>${new Date(c.commit.author.date).toLocaleString()}</small>`;
-            list.appendChild(li);
-          });
-      } catch (error) {
-         console.error("Error fetching Game GitHub data:", error);
-         list.innerHTML = "<li>Could not load Game updates.</li>";
-      }
-    }
-
-    // Run the commit fetching and toggle setup once the document structure is fully loaded
-    document.addEventListener('DOMContentLoaded', () => {
-        // 1. Load Data
-        loadAppCommits();
-        loadGameCommits();
-        
-        // 2. Setup Toggle Listeners
-        document.getElementById('toggle-app-commits').addEventListener('click', () => {
-            toggleCommits('app-commits-container');
-        });
-
-        document.getElementById('toggle-game-commits').addEventListener('click', () => {
-            toggleCommits('game-commits-container');
-        });
-
-        // 3. Initialize the view
-        // The toggleCommits call is not strictly needed here since we use the 'active' class in HTML, 
-        // but it ensures the buttons match the view on load.
-        toggleCommits('app-commits-container');
-    });
-
-
-    // --- Existing Fade Transition Script ---
-    document.body.classList.add('fade-enter');
-    setTimeout(() => {
-      document.body.classList.add('fade-enter-active');
-    }, 10);
-
-    document.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', function(e) {
-        const href = this.getAttribute('href');
-        if (href && !href.startsWith('http')) {
-          e.preventDefault();
-          document.body.classList.remove('fade-enter-active');
-          document.body.classList.add('fade-exit-active');
-          setTimeout(() => { window.location.href = href; }, 500);
-        }
-      });
-    });
-    // --- End Fade Transition Script ---
-    </script>
 </body>
 </html>
 

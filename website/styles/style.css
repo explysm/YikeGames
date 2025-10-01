@@ -1136,3 +1136,125 @@ body.chat-page, body.forums-page {
 ::-webkit-scrollbar-corner {
     background: transparent;
 }
+
+/* --- Profile Page Styles --- */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-body {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.profile-section {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    padding: 20px;
+    width: 100%;
+}
+
+.profile-section h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-decoration: underline;
+}
+
+.social-links-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.social-links-container a {
+    color: #01edf0;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+}
+
+.social-links-container a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* --- Edit Profile Page Styles --- */
+.edit-profile-container {
+    width: 100%;
+    max-width: 600px;
+}
+
+.edit-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.edit-profile-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+}
+
+.edit-profile-container label {
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* --- Mobile Responsiveness for Profile Pages --- */
+@media (max-width: 768px) {
+    .profile-container, .edit-profile-container {
+        padding: 10px;
+    }
+}
+
+/* --- Search Icon and Modal Styles --- */
+.search-icon-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    cursor: pointer;
+    background-color: rgba(13, 40, 60, 0.8);
+    padding: 10px;
+    border-radius: 50%;
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 15px rgba(1, 237, 240, 0.5);
+    transition: all 0.3s ease;
+}
+
+.search-icon-btn:hover {
+    background-color: rgba(1, 237, 240, 0.2);
+    transform: scale(1.1);
+}
+
+.search-icon-btn svg {
+    stroke: #01edf0;
+}
+
+#search-modal .modal-content {
+    max-width: 500px;
+}
+
+#search-status {
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #ff007f;
+}

@@ -97,6 +97,8 @@
        <div class="pfp-change">
          <input type="file" id="pfp-input" class="pfp-input-field" accept="image/*">
         <button class="btn pfp-btn" onclick="changePfp()">Change PFP</button>
+        <a href="edit-profile.html" class="btn">Edit Profile</a>
+        <a id="view-profile-btn" href="#" class="btn">View Profile</a>
        </div>
     </div>
     <div id="dev-management-section" style="display: none;" class="login-container new-post-form">
@@ -221,6 +223,9 @@
 
           // Set PFP: Use user.photoURL or default
           pfpDisplay.src = user.photoURL || DEFAULT_PFP_URL;
+
+          // Set view profile button link
+          document.getElementById('view-profile-btn').href = `profile.html?uid=${user.uid}`;
 
           // Get user's developer status
           const userRef = ref(db, `users/${user.uid}`);

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+    <header>
+        <h1 id="user-display-name">Loading...</h1>
+        <a href="../index.html" class="btn">Back to Home</a>
+    </header>
+
+    <main class="profile-container">
+        <div class="profile-header">
+            <img id="pfp-display" 
+                 src="https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png" 
+                 alt="Profile Picture" 
+                 class="pfp-image"
+                 onerror="this.src='https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png'">
+        </div>
+        <div class="profile-body">
+            <section class="profile-section">
+                <h2>About Me</h2>
+                <p id="user-bio">Loading...</p>
+            </section>
+            <section class="profile-section">
+                <h2>Social Links</h2>
+                <div id="user-socials" class="social-links-container">Loading...</div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUZZBN9qoM34lsvyEOeK2znSSw6kKMcEE",
+            authDomain: "yikegames-website.firebaseapp.com",
+            projectId: "yikegames-website",
+            databaseURL: "https://yikegames-website-default-rtdb.firebaseio.com/",
+            storageBucket: "yikegames-website.firebasestorage.app",
+            messagingSenderId: "1086586566551",
+            appId: "1:1086586566551:web:b64dfc25e6e6ac5a09b6d2",
+            measurementId: "G-FXH0D07D86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        async function loadUserProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('uid');
+
+            const displayNameEl = document.getElementById('user-display-name');
+            const pfpEl = document.getElementById('pfp-display');
+            const bioEl = document.getElementById('user-bio');
+            const socialsEl = document.getElementById('user-socials');
+
+            if (!userId) {
+                displayNameEl.textContent = 'User not found';
+                bioEl.textContent = '';
+                socialsEl.textContent = '';
+                return;
+            }
+
+            try {
+                const userRef = ref(db, `users/${userId}`);
+                const snapshot = await get(userRef);
+
+                if (!snapshot.exists()) {
+                    displayNameEl.textContent = 'User not found';
+                    bioEl.textContent = '';
+                    socialsEl.textContent = '';
+                    return;
+                }
+
+                const data = snapshot.val();
+
+                // Set safe displayName
+                displayNameEl.textContent = data.displayName || 'Unnamed User';
+
+                // Set profile picture with fallback
+                pfpEl.src = data.photoURL || 'https://res.cloudinary.com/dhptbygpt/image/upload/v1700000000/default-pfp.png';
+
+                // Set bio safely
+                bioEl.textContent = data.profile?.description || 'No bio yet.';
+
+                // Clear and populate socials
+                socialsEl.innerHTML = '';
+                if (data.profile?.socials && Object.keys(data.profile.socials).length > 0) {
+                    for (const [platform, handle] of Object.entries(data.profile.socials)) {
+                        if (!handle) continue;
+                        const link = document.createElement('a');
+                        link.href = `https://${platform}.com/${handle}`;
+                        link.textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        socialsEl.appendChild(link);
+                    }
+                } else {
+                    socialsEl.textContent = 'No social links added yet.';
+                }
+
+            } catch (error) {
+                console.error("Failed to load user profile:", error);
+                displayNameEl.textContent = 'Failed to load user';
+                bioEl.textContent = '';
+                socialsEl.textContent = '';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadUserProfile);
+    </script>
+</body>
+</html>

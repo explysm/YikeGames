@@ -75,6 +75,35 @@ const createMenu = () => {
                 { role: 'quit' }
             ]
         }] : []),
+
+        // File menu (optional)
+        {
+            label: 'File',
+            submenu: [
+                { role: 'quit' }
+            ]
+        },
+
+        // Developer menu
+        {
+            label: 'Developer',
+            submenu: [
+                {
+                    label: 'Toggle DevTools',
+                    accelerator: isMac ? 'Cmd+Alt+I' : 'Ctrl+Shift+I',
+                    click: (_, focusedWindow) => {
+                        if (focusedWindow) focusedWindow.webContents.toggleDevTools();
+                    }
+                },
+                {
+                    label: 'Reload',
+                    accelerator: isMac ? 'Cmd+R' : 'Ctrl+R',
+                    click: (_, focusedWindow) => {
+                        if (focusedWindow) focusedWindow.reload();
+                    }
+                }
+            ]
+        }
     ];
 
     const menu = Menu.buildFromTemplate(template);

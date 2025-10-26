@@ -1378,30 +1378,45 @@ audio {
     max-width: 400px;
     margin: 20px auto;
     display: block;
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid #01edf0;
-    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
-    border-radius: 0;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 2px solid #01edf0 !important;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5) !important;
+    border-radius: 0 !important;
     padding: 10px;
 }
 
-audio::-webkit-media-controls-panel {
-    background-color: rgba(13, 40, 60, 0.8);
-    color: #01edf0;
+/* Generic styling for media controls (may vary by browser) */
+audio::-webkit-media-controls-panel,
+audio::--moz-media-controls-panel,
+audio::--ms-media-controls-panel {
+    background-color: rgba(13, 40, 60, 0.8) !important;
+    color: #01edf0 !important;
 }
 
 audio::-webkit-media-controls-play-button,
 audio::-webkit-media-controls-current-time-display,
 audio::-webkit-media-controls-time-remaining-display,
 audio::-webkit-media-controls-timeline,
-audio::-webkit-media-controls-volume-slider {
-    color: #01edf0;
+audio::-webkit-media-controls-volume-slider,
+audio::--moz-media-controls-play-button,
+audio::--moz-media-controls-current-time-display,
+audio::--moz-media-controls-time-remaining-display,
+audio::--moz-media-controls-timeline,
+audio::--moz-media-controls-volume-slider,
+audio::--ms-media-controls-play-button,
+audio::--ms-media-controls-current-time-display,
+audio::--ms-media-controls-time-remaining-display,
+audio::--ms-media-controls-timeline,
+audio::--ms-media-controls-volume-slider {
+    color: #01edf0 !important;
 }
 
 /* --- Disable Image Saving --- */
 img {
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10 and IE 11 */
-    user-select: none; /* Standard syntax */
-    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none !important; /* Safari */
+    -ms-user-select: none !important; /* IE 10 and IE 11 */
+    user-select: none !important; /* Standard syntax */
+    -webkit-touch-callout: none !important; /* iOS Safari */
+    pointer-events: none !important; /* Prevent all mouse events */
+    touch-action: manipulation !important; /* Control touch behaviors */
 }

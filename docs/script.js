@@ -80,7 +80,7 @@ function renderContents(contents, currentPath) {
             if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExtension)) {
                 previewHtml = `<img src="${downloadUrl}" alt="${item.name}" class="post-image-preview">`;
             } else if (['mp3', 'wav', 'ogg'].includes(fileExtension)) {
-                previewHtml = `<audio controls src="${downloadUrl}"></audio>`;
+                previewHtml = `<audio controls src="${downloadUrl}" class="post-image-preview"></audio>`;
             }
 
             itemElement.innerHTML = `

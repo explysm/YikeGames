@@ -1371,3 +1371,37 @@ body.chat-page, body.forums-page {
     font-size: 1rem;
     color: #ff007f;
 }
+
+/* --- Audio Player Styles --- */
+audio {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    display: block;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #01edf0;
+    box-shadow: 0 0 10px rgba(1, 237, 240, 0.5), inset 0 0 5px rgba(1, 237, 240, 0.5);
+    border-radius: 0;
+    padding: 10px;
+}
+
+audio::-webkit-media-controls-panel {
+    background-color: rgba(13, 40, 60, 0.8);
+    color: #01edf0;
+}
+
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display,
+audio::-webkit-media-controls-timeline,
+audio::-webkit-media-controls-volume-slider {
+    color: #01edf0;
+}
+
+/* --- Disable Image Saving --- */
+img {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+    -webkit-touch-callout: none; /* iOS Safari */
+}

@@ -1,12 +1,14 @@
 const owner = 'explysm';
 const repo = 'yikegames';
 const branch = 'cdn';
-const assetsPath = 'assets';
+const initialAssetsPath = 'assets'; // The expected folder name
 const githubApiBaseUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
 const githubRawContentBaseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}`;
 
 const assetBrowser = document.getElementById('asset-browser');
 const loadingMessage = document.getElementById('loading-message');
+
+let currentPath = initialAssetsPath; // Keep track of the current path
 
 async function fetchGitHubContents(path) {
     loadingMessage.style.display = 'flex';
@@ -15,10 +17,15 @@ async function fetchGitHubContents(path) {
     try {
         const response = await fetch(`${githubApiBaseUrl}/${path}?ref=${branch}`);
         if (!response.ok) {
-            // Log the full response status and text for better debugging
             const errorText = await response.text();
             console.error(`GitHub API error: ${response.status} - ${response.statusText}`, errorText);
-            throw new Error(`GitHub API error: ${response.status} - ${response.statusText}. This might be due to CORS restrictions if opening directly from file system. Try running a local web server.`);
+            let errorMessage = `GitHub API error: ${response.status} - ${response.statusText}.`;
+            if (response.status === 404) {
+                errorMessage += ` The path '${path}' on branch '${branch}' was not found. Please check the repository, branch, and folder name.`;
+            } else {
+                errorMessage += ` This might be due to CORS restrictions if opening directly from file system. Try running a local web server.`;
+            }
+            throw new Error(errorMessage);
         }
         const contents = await response.json();
 
@@ -29,6 +36,7 @@ async function fetchGitHubContents(path) {
             return a.name.localeCompare(b.name);
         });
 
+        currentPath = path; // Update current path on successful fetch
         renderContents(contents, path);
     } catch (error) {
         console.error('Error fetching GitHub contents:', error);
@@ -41,13 +49,13 @@ async function fetchGitHubContents(path) {
 function renderContents(contents, currentPath) {
     assetBrowser.innerHTML = ''; // Clear existing content
 
-    // Add a "Go Up" button if not in the root assets directory
-    if (currentPath !== assetsPath) {
+    // Add a "Go Up" button if not in the initial assets directory
+    if (currentPath !== initialAssetsPath) {
         const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
         const upButton = document.createElement('div');
         upButton.className = 'nav-btn';
         upButton.textContent = '<- Go Up';
-        upButton.addEventListener('click', () => fetchGitHubContents(parentPath === '' ? assetsPath : parentPath));
+        upButton.addEventListener('click', () => fetchGitHubContents(parentPath === '' ? initialAssetsPath : parentPath));
         assetBrowser.appendChild(upButton);
     }
 
@@ -89,4 +97,4 @@ function renderContents(contents, currentPath) {
 }
 
 // Initial load
-fetchGitHubContents(assetsPath);
+fetchGitHubContents(initialAssetsPath);

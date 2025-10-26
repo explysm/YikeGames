@@ -15,7 +15,10 @@ async function fetchGitHubContents(path) {
     try {
         const response = await fetch(`${githubApiBaseUrl}/${path}?ref=${branch}`);
         if (!response.ok) {
-            throw new Error(`GitHub API error: ${response.statusText}`);
+            // Log the full response status and text for better debugging
+            const errorText = await response.text();
+            console.error(`GitHub API error: ${response.status} - ${response.statusText}`, errorText);
+            throw new Error(`GitHub API error: ${response.status} - ${response.statusText}. This might be due to CORS restrictions if opening directly from file system. Try running a local web server.`);
         }
         const contents = await response.json();
 
